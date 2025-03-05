@@ -42,28 +42,35 @@ class Cities:
 
         self.adjacency_matrix = csr_matrix(adjacency_matrix)
 
-    def visualize_route(self, cities: List[int]):
+    def visualize_route(self, paths=Dict[str, List[int]]):
         # lats = [self.coordinates.at[city, "lat"] for city in cities]
         # lons = [self.coordinates.at[city, "lon"] for city in cities]
-        lats = [
-            self.coordinates.at[self.list_of_cities[city], "lat"] for city in cities
-        ]
-        lons = [
-            self.coordinates.at[self.list_of_cities[city], "lon"] for city in cities
-        ]
-        [center_lat, center_lon] = ((sum(lats) / len(lats)), (sum(lons) / len(lons)))
-        my_map = folium.Map(location=[center_lat, center_lon], zoom_start=10)
-        for i in range(len(cities)):
-            lat, lon = lats[i], lons[i]
-            (next_lat, next_lon) = (
-                (lats[i + 1], lons[i + 1]) if i < (len(lats) - 1) else (None, None)
-            )
-            folium.Marker(
-                [lat, lon],
-                popup=self.list_of_cities[cities[i]].replace("_", " ").title(),
-            ).add_to(my_map)
-            if next_lat:
-                folium.PolyLine([(lat, lon), (next_lat, next_lon)]).add_to(my_map)
+        my_map = folium.Map(location=[37.5, -98.5], zoom_start=10)
+        colors = ["blue", "green", "red", "orange", "black"]
+        color_index = 0
+        for algo, cities in paths.items():
+            color = colors[color_index]
+            color_index += 1
+            lats = [
+                self.coordinates.at[self.list_of_cities[city], "lat"] for city in cities
+            ]
+            lons = [
+                self.coordinates.at[self.list_of_cities[city], "lon"] for city in cities
+            ]
+            for i in range(len(cities)):
+                lat, lon = lats[i], lons[i]
+                (next_lat, next_lon) = (
+                    (lats[i + 1], lons[i + 1]) if i < (len(lats) - 1) else (None, None)
+                )
+                folium.Marker(
+                    [lat, lon],
+                    popup=self.list_of_cities[cities[i]].replace("_", " ").title(),
+                    icon=folium.Icon(color=color),
+                ).add_to(my_map)
+                if next_lat:
+                    folium.PolyLine(
+                        [(lat, lon), (next_lat, next_lon)], color=color
+                    ).add_to(my_map)
 
         lat_range, lon_range = abs(max(lats) - min(lats)), abs(max(lons) - min(lons))
         sw = (min(lats) - lat_range / 10, min(lons) - lon_range / 10)

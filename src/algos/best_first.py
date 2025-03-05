@@ -46,7 +46,6 @@ def bestFirst(
     while priority_queue:
         # Get the city with the lowest heuristic value
         _, current, path, cost = heapq.heappop(priority_queue)
-        print(f"Checking city: {cities.list_of_cities[current]}")
         # If we've reached the destination, return the path and cost
         if current == end_city:
             return path, cost
@@ -54,11 +53,6 @@ def bestFirst(
         # Get all neighbors of the current city
         row = cities.adjacency_matrix[current].toarray().flatten()
         neighbors = np.nonzero(row)[0]
-        print("Neighbors:")
-        for city in neighbors:
-            print(
-                f"{cities.list_of_cities[city]} is {heuristic(city, end_city) / 1000:.2f} km away from {cities.list_of_cities[end_city]}"
-            )
 
         for neighbor in neighbors:
             if neighbor not in visited:

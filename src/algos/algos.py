@@ -1,11 +1,11 @@
 from enum import Enum
-from typing import Callable
+from typing import Callable, List
 
-from a_star import a_star
-from best_first import bestFirst
-from bfs import bfs
-from dfs import dfs
-from id_dfs import idDfs
+from algos.a_star import a_star
+from algos.best_first import bestFirst
+from algos.bfs import bfs
+from algos.dfs import dfs
+from algos.id_dfs import idDfs
 
 
 class Algos(Enum):
@@ -14,6 +14,7 @@ class Algos(Enum):
     ID_DFS = 3
     A_STAR = 4
     BEST_FIRST = 5
+    ALL_ALGOS = 6
 
 
 def get_algo_input():
@@ -36,14 +37,15 @@ def get_algo_input():
             print(f"Error: {answer} is not a valid number. Please select a number 1-5")
 
 
-def get_algo() -> Callable:
+def get_algo() -> List[Callable]:
     algo = get_algo_input()
     algorithm_map = {
-        Algos.BFS: bfs,
-        Algos.DFS: dfs,
-        Algos.ID_DFS: idDfs,
-        Algos.A_STAR: a_star,
-        Algos.BEST_FIRST: bestFirst,
+        Algos.BFS: [bfs],
+        Algos.DFS: [dfs],
+        Algos.ID_DFS: [idDfs],
+        Algos.A_STAR: [a_star],
+        Algos.BEST_FIRST: [bestFirst],
+        Algos.ALL_ALGOS: [bfs, dfs, idDfs, a_star, bestFirst],
     }
 
     return algorithm_map[algo]
