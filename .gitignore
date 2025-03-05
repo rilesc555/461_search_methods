@@ -1,0 +1,6 @@
+.git
+.venv
+.DS_Store
+src/__pycache__
+src/.DS_Store
+srd/.ruff_cache
