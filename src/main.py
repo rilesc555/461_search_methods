@@ -2,14 +2,14 @@ import time
 
 import pandas as pd
 
-import algos
+from algos import algos
 from cities import Cities
 
 
 def main():
     print("Hello!")
     coordinates = pd.read_csv(
-        "./src/coordinates.csv", index_col=0, names=["lat", "lon"]
+        "./src/data/coordinates.csv", index_col=0, names=["lat", "lon"]
     )
     cities = Cities(coordinates)
     while True:

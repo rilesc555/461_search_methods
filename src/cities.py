@@ -23,7 +23,7 @@ class Cities:
             city: i for i, city in enumerate(self.list_of_cities)
         }
         self.num_cities = len(self.list_of_cities)
-        with open("./src/Adjacencies.txt", "r") as f:
+        with open("./src/data/Adjacencies.txt", "r") as f:
             lines = f.readlines()
 
         adjacency_matrix = np.zeros((self.num_cities, self.num_cities), float)
