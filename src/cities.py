@@ -1,5 +1,7 @@
+from collections import defaultdict
 from typing import Dict, List, Tuple
 
+import branca.colormap as cm
 import folium
 import numpy as np
 import pandas as pd
@@ -46,31 +48,44 @@ class Cities:
         # lats = [self.coordinates.at[city, "lat"] for city in cities]
         # lons = [self.coordinates.at[city, "lon"] for city in cities]
         my_map = folium.Map(location=[37.5, -98.5], zoom_start=10)
-        colors = ["blue", "green", "red", "orange", "black"]
-        color_index = 0
+        colors = ["blue", "blue", "green", "red", "orange", "black"]
+        # segments format: (start, end): [algos]
+        segments = defaultdict(list)
+        lats, lons = [], []
         for algo, cities in paths.items():
-            color = colors[color_index]
-            color_index += 1
-            lats = [
-                self.coordinates.at[self.list_of_cities[city], "lat"] for city in cities
-            ]
-            lons = [
-                self.coordinates.at[self.list_of_cities[city], "lon"] for city in cities
-            ]
             for i in range(len(cities)):
-                lat, lon = lats[i], lons[i]
-                (next_lat, next_lon) = (
-                    (lats[i + 1], lons[i + 1]) if i < (len(lats) - 1) else (None, None)
+                if i < len(cities) - 1:
+                    start, end = cities[i], cities[i + 1]
+                    segment = (min(start, end), max(start, end))
+                    segments[segment].append(algo)
+
+        for segment, algos in segments.items():
+            start, end = segment[0], segment[1]
+            start_city = self.list_of_cities[start]
+            end_city = self.list_of_cities[end]
+            start_lat = self.coordinates.at[start_city, "lat"]
+            lats.append(start_lat)
+            start_lon = self.coordinates.at[start_city, "lon"]
+            lons.append(start_lon)
+            end_lat = self.coordinates.at[end_city, "lat"]
+            lats.append(end_lat)
+            end_lon = self.coordinates.at[end_city, "lon"]
+            lons.append(end_lon)
+            if len(algos) > 1:
+                extra_points = self.geod.npts(
+                    start_lon, start_lat, end_lon, end_lat, len(algos) - 1
                 )
-                folium.Marker(
-                    [lat, lon],
-                    popup=self.list_of_cities[cities[i]].replace("_", " ").title(),
-                    icon=folium.Icon(color=color),
-                ).add_to(my_map)
-                if next_lat:
-                    folium.PolyLine(
-                        [(lat, lon), (next_lat, next_lon)], color=color
-                    ).add_to(my_map)
+                for i in range(len(extra_points)):
+                    coords = extra_points[i]
+                    new_coords = (coords[1], coords[0])
+                    extra_points[i] = new_coords
+            colormap = cm.LinearColormap(colors[: len(algos) + 1])
+            folium.ColorLine(
+                [(start_lat, start_lon), *extra_points, (end_lat, end_lon)],
+                colors=np.linspace(0.0, 1.0, len(algos) + 2),
+                colormap=colormap,
+                weight=20,
+            ).add_to(my_map)
 
         lat_range, lon_range = abs(max(lats) - min(lats)), abs(max(lons) - min(lons))
         sw = (min(lats) - lat_range / 10, min(lons) - lon_range / 10)
